@@ -15,6 +15,7 @@
  */
 package ch2;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
@@ -178,6 +179,85 @@ public class ReductionTest {
             Fraction a = new Fraction(4, 3);
             Fraction b = new Fraction(9, 18);
             assertThat(b.multiply(a), is(a.multiply(b)));
+        }
+    }
+
+    public static class MinusTest {
+        @Test
+        public void fraction1_2MinusFraction5_6IsNegative1_3() {
+            Fraction left = new Fraction(1, 2);
+            Fraction right = new Fraction(5, 6);
+            assertThat(left.minus(right), is(new Fraction(-1, 3)));
+        }
+
+        @Test
+        public void fraction1_2MinusInt1IsNegative1_2() {
+            Fraction fraction = new Fraction(1, 2);
+            assertThat(fraction.minus(1), is(new Fraction(-1, 2)));
+        }
+    }
+
+    public static class ToNegativeTest {
+        @Test
+        public void positiveToNegative() {
+            Fraction fraction = new Fraction(1, 2);
+            assertThat(fraction.toNegative(), is(new Fraction(-1, 2)));
+        }
+
+        @Test
+        public void negativeToPositive() {
+            Fraction fraction = new Fraction(-1, 2);
+            assertThat(fraction.toNegative(), is(new Fraction(1, 2)));
+        }
+    }
+
+    public static class TransposeTest {
+        @Test
+        public void transposeOfFraction2_3IsFraction3_2() {
+            Fraction fraction = new Fraction(2, 3);
+            assertThat(fraction.transpose(), is(new Fraction(3, 2)));
+        }
+
+        @Test
+        public void transposeOfNegativeFraction2_3IsNegativeFraction3_2() {
+            Fraction fraction = new Fraction(-2, 3);
+            assertThat(fraction.transpose(), is(new Fraction(-3, 2)));
+        }
+    }
+
+    public static class DividingTest {
+        @Test
+        public void fraction2_3DividedByFraction4_3IsFraction1_2() {
+            Fraction left = new Fraction(2, 3);
+            Fraction right = new Fraction(4, 3);
+            assertThat(left.divide(right), is(new Fraction(1, 2)));
+        }
+
+        @Test
+        public void fraction2_3DividedByNegativeFraction4_3IsNegativeFraction1_2() {
+            Fraction left = new Fraction(2, 3);
+            Fraction right = new Fraction(-4, 3);
+            assertThat(left.divide(right), is(new Fraction(-1, 2)));
+        }
+
+        @Test
+        public void fraction2_3DividedByInt2IsFraction1_3() {
+            Fraction fraction = new Fraction(2, 3);
+            assertThat(fraction.divide(2), is(new Fraction(1, 3)));
+        }
+    }
+
+    public static class IntConstructorTest {
+        @Test
+        public void fromInt1() {
+            Fraction fraction = new Fraction(1);
+            assertThat(fraction, is(new Fraction(1, 1)));
+        }
+
+        @Test
+        public void fromIntNegative3() {
+            Fraction fraction = new Fraction(-3);
+            assertThat(fraction, is(new Fraction(-3, 1)));
         }
     }
 }

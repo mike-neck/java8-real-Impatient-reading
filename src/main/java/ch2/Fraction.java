@@ -49,6 +49,13 @@ public class Fraction {
     private final int numerator;
     private final int denominator;
 
+    public Fraction(int numerator) {
+        int pos = positive(numerator);
+        this.numerator = pos;
+        this.denominator = 1;
+        this.positive = pos == numerator;
+    }
+
     public Fraction(int numerator, int denominator) {
         int divisor = divisor(numerator, denominator);
         this.numerator = positive(numerator) / divisor;
@@ -84,6 +91,30 @@ public class Fraction {
         return new Fraction(numerator * other.numerator,
                 denominator * other.denominator,
                 !(positive ^ other.positive));
+    }
+
+    public Fraction minus(Fraction other) {
+        return plus(other.toNegative());
+    }
+
+    public Fraction toNegative() {
+        return new Fraction(numerator, denominator, !positive);
+    }
+
+    public Fraction minus(int value) {
+        return plus(-value);
+    }
+
+    public Fraction transpose() {
+        return new Fraction(denominator, numerator, positive);
+    }
+
+    public Fraction divide(Fraction other) {
+        return multiply(other.transpose());
+    }
+
+    public Fraction divide(int value) {
+        return divide(new Fraction(value));
     }
 
     @Override
