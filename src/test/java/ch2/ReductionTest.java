@@ -353,5 +353,31 @@ public class ReductionTest {
                     .reduce(new Fraction(0), (s, f) -> s.plus(f));
             assertThat(reduce, is(new Fraction(2).minus(new Fraction(1, 2).power(9))));
         }
+
+        @Test
+        public void filterIntCalculation() {
+            int sum = Stream
+                    .iterate(new Fraction(1, 3), f -> f.plus(new Fraction(2, 3)))
+                    .filter(Fraction::isInt)
+                    .limit(10)
+                    .mapToInt(Fraction::asInt)
+                    .reduce(0, (s, n) -> s + n);
+            assertThat(sum, is(100));
+        }
+
+        @Test
+        public void reduceToList() {
+            List<Fraction> list = Stream
+                    .iterate(new Fraction(1, 3), f -> f.plus(new Fraction(1, 6)))
+                    .limit(10)
+                    .reduce(new ArrayList<>(), (l, f) -> {
+                        l.add(f);
+                        return l;
+                    }, (left, right) -> {
+                        left.addAll(right);
+                        return left;
+                    });
+            assertThat(list.size(), is(10));
+        }
     }
 }
