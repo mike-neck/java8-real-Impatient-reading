@@ -15,7 +15,9 @@
  */
 package ch2;
 
-public class Fraction {
+import java.util.Objects;
+
+public class Fraction implements Comparable<Fraction> {
 
     static int divisor(int left, int right) throws ArithmeticException {
         if (right == 0) {
@@ -43,6 +45,14 @@ public class Fraction {
 
     private static int arithmeticValue(int num, int den, boolean pos) {
         return (pos? 1:-1) * num * den;
+    }
+
+    static int power(int num, int time) {
+        int result = 1;
+        for (int i = 0; i < time; i++) {
+            result *= num;
+        }
+        return result;
     }
 
     private final boolean positive;
@@ -115,6 +125,34 @@ public class Fraction {
 
     public Fraction divide(int value) {
         return divide(new Fraction(value));
+    }
+
+    @Override
+    public int compareTo(Fraction other) {
+        Fraction o = Objects.requireNonNull(other);
+        return Integer.compare(numerator * o.denominator, o.numerator * denominator);
+    }
+
+    public int compareTo(int other) {
+        return Integer.compare(numerator * (positive? 1:-1), other * denominator);
+    }
+
+    public Fraction power(int time) {
+        if (time < 0) {
+            throw new ArithmeticException("negative argument is not allowed[" + time + "].");
+        }
+        return new Fraction(power(numerator, time), power(denominator, time), time % 2 == 0 || positive);
+    }
+
+    public boolean isInt() {
+        return denominator == 1;
+    }
+
+    public int asInt() {
+        if (denominator != 1) {
+            throw new ArithmeticException(toString() + " is not integer.");
+        }
+        return positive? numerator:-numerator;
     }
 
     @Override

@@ -15,15 +15,21 @@
  */
 package ch2;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
+
 import static ch2.Fraction.divisor;
 import static ch2.Fraction.positive;
+import static ch2.Fraction.power;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assume.assumeThat;
 
 @RunWith(Enclosed.class)
 public class ReductionTest {
@@ -258,6 +264,94 @@ public class ReductionTest {
         public void fromIntNegative3() {
             Fraction fraction = new Fraction(-3);
             assertThat(fraction, is(new Fraction(-3, 1)));
+        }
+    }
+
+    public static class ComparisonTest {
+        @Test
+        public void fraction1_2IsBiggerThan1_4() {
+            Fraction big = new Fraction(1, 2);
+            Fraction small = new Fraction(1, 4);
+            assertThat(big.compareTo(small) > 0, is(true));
+        }
+
+        @Test
+        public void fraction1_2IsSmallerThanInt1() {
+            Fraction small = new Fraction(1, 2);
+            assertThat(small.compareTo(1) < 0, is(true));
+        }
+    }
+
+    public static class PowerTest {
+        @Test
+        public void power1IsTheSameValue() {
+            Fraction fraction = new Fraction(1, 2);
+            assertThat(fraction.power(1), is(new Fraction(1, 2)));
+        }
+
+        @Test
+        public void innerPower() {
+            assertThat(power(2, 2), is(4));
+        }
+
+        @Test
+        public void power2() {
+            Fraction fraction = new Fraction(1, 2);
+            assertThat(fraction.power(2), is(new Fraction(1, 4)));
+        }
+
+        @Test
+        public void negativeValuePoweredEvenTimesBecomesPositive() {
+            Fraction fraction = new Fraction(-1, 4);
+            assertThat(fraction.power(6).compareTo(0) > 0, is(true));
+        }
+
+        @Test
+        public void negativeValuePoweredOddTimesRemainsNegative() {
+            Fraction fraction = new Fraction(-1, 4);
+            Fraction powered = fraction.power(5);
+            assertThat(powered.compareTo(0) < 0, is(true));
+        }
+    }
+
+    public static class IntOperationTest {
+        @Test
+        public void isInt() {
+            Fraction fraction = new Fraction(1);
+            assertThat(fraction.isInt(), is(true));
+        }
+
+        @Test
+        public void isNotInt() {
+            Fraction fraction = new Fraction(1, 2);
+            assertThat(fraction.isInt(), is(false));
+        }
+
+        @Test
+        public void asInt() {
+            Fraction fraction = new Fraction(2);
+            assumeThat(fraction.isInt(), is(true));
+            assertThat(fraction.asInt(), is(2));
+        }
+    }
+
+    public static class StreamReductionTest {
+        @Test
+        public void plus() {
+            Optional<Fraction> sum = Stream
+                    .iterate(new Fraction(1), f -> f.multiply(new Fraction(1, 2)))
+                    .limit(10)
+                    .reduce((l, r) -> l.plus(r));
+            assertThat(sum, is(Optional.of(new Fraction(2).minus(new Fraction(1, 2).power(9)))));
+        }
+
+        @Test
+        public void toList() {
+            Fraction reduce = Stream
+                    .iterate(new Fraction(1), f -> f.multiply(new Fraction(1, 2)))
+                    .limit(10)
+                    .reduce(new Fraction(0), (s, f) -> s.plus(f));
+            assertThat(reduce, is(new Fraction(2).minus(new Fraction(1, 2).power(9))));
         }
     }
 }
