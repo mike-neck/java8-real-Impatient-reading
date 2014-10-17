@@ -21,7 +21,7 @@ public final class ExInterfaces {
 
     private ExInterfaces() {}
 
-    private static Runnable toRunnable(ExRunnable1<?> runnable, Consumer<Exception> handler) {
+    private static Runnable toRunnable(ExRunnable1<? extends Exception> runnable, Consumer<Exception> handler) {
         return () -> {
             try {
                 runnable.run();
@@ -31,7 +31,7 @@ public final class ExInterfaces {
         };
     }
 
-    public static Runnable unchecked(ExRunnable1<?> runnable, Consumer<Exception> handler) {
+    public static Runnable unchecked(ExRunnable1<? extends Exception> runnable, Consumer<Exception> handler) {
         return toRunnable(runnable, handler);
     }
 
@@ -40,4 +40,25 @@ public final class ExInterfaces {
         public void run() throws E;
     }
 
+    public static <T> Consumer<T> unchecked(ExConsumer<T, ? extends Exception> consumer, Consumer<Exception> handler) {
+        return (T t) -> {
+            try {
+                consumer.accept(t);
+            } catch (Exception e) {
+                handler.accept(e);
+            }
+        };
+    }
+
+    @FunctionalInterface
+    public interface ExConsumer<T, E extends Exception> {
+        public void accept(T t) throws E;
+
+        default <F extends Exception> ExConsumer<T, Exception> andThen(ExConsumer<T, F> next) {
+            return (T t) -> {
+                accept(t);
+                next.accept(t);
+            };
+        }
+    }
 }

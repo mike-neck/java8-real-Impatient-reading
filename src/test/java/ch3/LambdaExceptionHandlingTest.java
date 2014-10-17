@@ -22,6 +22,9 @@ import org.junit.runner.RunWith;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -33,6 +36,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -89,6 +93,30 @@ public class LambdaExceptionHandlingTest {
                 }
             }, e -> fail(e.getMessage())));
             assertThat(queue.take().size(), is(38));
+        }
+    }
+
+    public static class ConsumerTest {
+
+        private static final Logger A = Logger.getLogger("ConsumerTestLogger(A)");
+
+        private static final Logger B = Logger.getLogger("ConsumerTestLogger(B)");
+
+        @Test
+        public void fileNotFound() {
+            Stream.of("hoge", "foo", "bar")
+                    .forEach(unchecked(FileReader::new,
+                            e -> assertThat(e, instanceOf(FileNotFoundException.class))));
+        }
+
+        @Test
+        public void logging() {
+            ExInterfaces.ExConsumer<String, Exception> logToA = A::info;
+            ExInterfaces.ExConsumer<String, Exception> logToB = B::info;
+            String message = "msg";
+            Stream.of(message)
+                    .forEach(unchecked(logToA.andThen(logToB),
+                            e -> fail(e.getMessage())));
         }
     }
 }
