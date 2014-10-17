@@ -22,10 +22,20 @@ import org.junit.runner.RunWith;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static ch3.ExInterfaces.unchecked;
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -45,6 +55,8 @@ public class LambdaExceptionHandlingTest {
             EXEC.shutdown();
         }
 
+        private final ClassLoader loader = getClass().getClassLoader();
+
         @Test
         public void uncheckedException1WithoutException() throws InterruptedException {
             final BlockingQueue<String> queue = new LinkedBlockingQueue<>();
@@ -60,6 +72,23 @@ public class LambdaExceptionHandlingTest {
         public void uncheckedException1WithException() {
             EXEC.submit(unchecked(() -> new FileReader("notExistingFile"),
                     (e) -> assertThat(e, instanceOf(FileNotFoundException.class))));
+        }
+
+        @Test
+        public void uncheckedException2WithoutException() throws InterruptedException {
+            final BlockingQueue<List<String>> queue = new LinkedBlockingQueue<>();
+            EXEC.submit(unchecked(() -> {
+                URL resource = Objects.requireNonNull(loader.getResource("APACHE_LICENSE.txt"));
+                Path path = Paths.get(resource.toURI());
+                final Pattern pattern = Pattern.compile("[\\P{L}]+");
+                try (Stream<String> lines = Files.lines(path, StandardCharsets.UTF_8)) {
+                    queue.put(lines.flatMap(pattern::splitAsStream)
+                            .map(String::toLowerCase)
+                            .filter(w -> w.length() > 5)
+                            .collect(Collectors.toList()));
+                }
+            }, e -> fail(e.getMessage())));
+            assertThat(queue.take().size(), is(38));
         }
     }
 }

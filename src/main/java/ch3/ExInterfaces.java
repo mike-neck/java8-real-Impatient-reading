@@ -21,7 +21,7 @@ public final class ExInterfaces {
 
     private ExInterfaces() {}
 
-    public static Runnable unchecked(ExRunnable1<?> runnable, Consumer<Exception> handler) {
+    private static Runnable toRunnable(ExRunnable1<?> runnable, Consumer<Exception> handler) {
         return () -> {
             try {
                 runnable.run();
@@ -29,6 +29,10 @@ public final class ExInterfaces {
                 handler.accept(e);
             }
         };
+    }
+
+    public static Runnable unchecked(ExRunnable1<?> runnable, Consumer<Exception> handler) {
+        return toRunnable(runnable, handler);
     }
 
     @FunctionalInterface
