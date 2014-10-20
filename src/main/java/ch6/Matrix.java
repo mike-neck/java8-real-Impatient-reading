@@ -32,12 +32,20 @@ public class Matrix {
         this(left.getX(), right.getX(), left.getY(), right.getY());
     }
 
+    public int getDeterminant() {
+        return leftTop * rightBottom - leftBottom * rightTop;
+    }
+
     public Matrix multiply(Matrix o) {
         Vector t = Vector.make(leftTop, rightTop);
         Vector b = Vector.make(leftBottom, rightBottom);
         Vector l = Vector.make(o.leftTop, o.leftBottom);
         Vector r = Vector.make(o.rightTop, o.rightBottom);
         return new Matrix(Vector.make(t.multiply(l).total(), b.multiply(l).total()), Vector.make(t.multiply(r).total(), b.multiply(r).total()));
+    }
+
+    public int getLeftTop() {
+        return leftTop;
     }
 
     @Override
@@ -75,5 +83,58 @@ public class Matrix {
         public int total() {
             return x + y;
         }
+    }
+
+    private static class MatrixBuilder implements LeftTop, RightTop, LeftBottom, RightBottom {
+
+        private int lt; private int rt;
+        private int lb; private int rb;
+
+        MatrixBuilder(int lt) {
+            this.lt = lt;
+        }
+
+        @Override
+        public RightBottom rightBottom(int rb) {
+            this.rb = rb;
+            return this;
+        }
+
+        @Override
+        public RightTop rightTop(int rt) {
+            this.rt = rt;
+            return this;
+        }
+
+        @Override
+        public Matrix make() {
+            return new Matrix(lt, rt, lb, rb);
+        }
+
+        @Override
+        public LeftBottom leftBottom(int lb) {
+            this.lb = lb;
+            return this;
+        }
+    }
+
+    public static LeftTop leftTop(int lt) {
+        return new MatrixBuilder(lt);
+    }
+
+    public interface LeftTop {
+        public RightTop rightTop(int rt);
+    }
+
+    public interface RightTop {
+        public LeftBottom leftBottom(int lb);
+    }
+
+    public interface LeftBottom {
+        public RightBottom rightBottom(int rb);
+    }
+
+    public interface RightBottom {
+        public Matrix make();
     }
 }
