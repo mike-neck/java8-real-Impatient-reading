@@ -26,7 +26,9 @@ public class MatrixTest {
 
     @Test
     public void calculateFibonacci() {
-        final Matrix matrix = Matrix.leftTop(1).rightTop(1).leftBottom(1).rightBottom(0).make();
+        final Matrix matrix = Matrix
+                .leftTop(1).rightTop(1)
+                .leftBottom(1).rightBottom(0).make();
         Matrix[] fibonacci = new Matrix[5];
         Arrays.parallelSetAll(fibonacci, i -> matrix);
         Arrays.parallelPrefix(fibonacci, (left, right) -> left.multiply(right));
