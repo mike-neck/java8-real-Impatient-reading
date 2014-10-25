@@ -187,6 +187,14 @@ public class CollectTest {
         assertThat(map.size(), is(60));
     }
 
+    @Test
+    public void countWords() {
+        Map<String, Integer> map = PATTERN.splitAsStream(text)
+                .map(String::toLowerCase)
+                .collect(groupingBy(Function.<String>identity(), summingInt(s -> 1)));
+        System.out.println(map.get("license"));
+    }
+
     private class StringWithIndex {
         private final int index;
         private final String word;
